@@ -82,7 +82,7 @@ You need a web browser to run this project.
 - Follow on GitHub: Click the "Follow" button on the GitHub project page to stay updated with the latest developments.
 - Star the project: Click the "Star" button on the GitHub project page to show your appreciation and support.
 
-### Contributing
+## Contributing
 
 If you'd like to contribute to this project, please follow these guidelines:
 
@@ -94,13 +94,13 @@ If you'd like to contribute to this project, please follow these guidelines:
 
 Your support is greatly appreciated! Thank you for contributing to the project.
 
-### License
+## License
 
 This project is licensed under the [**MIT License**](/LICENSE).
 
 Feel free to contribute or provide feedback to improve the **DNA News** website. Happy reading, and Happy coding! 📰🌐
 
-### Acknowledgments
+## Acknowledgments
 
 - **[NewsAPI]** for providing such a cool API
 
