@@ -1,6 +1,6 @@
 import { beautifyDate, minimizeString } from "@/lib/utils";
 
-export const Card = ({ news }) => {
+export const TopHeadlinesCard = ({ news }) => {
   return (
     <a href={news?.url} target="_blank">
       <div className="w-full h-full rounded p-1 shadow-md">
@@ -35,4 +35,8 @@ export const Card = ({ news }) => {
       </div>
     </a>
   );
+};
+
+export const Card = () => {
+  return <div>Card</div>;
 };
