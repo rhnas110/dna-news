@@ -1,10 +1,15 @@
+import { Routes, Route } from "react-router-dom";
 import { News } from "./pages/News";
 
 function App() {
   return (
-    <>
-      <News />
-    </>
+    <Routes>
+      <Route path="/" element={"Home"} />
+      <Route path="/about" element={"About"} />
+
+      {/* 404 PAGE */}
+      <Route path="*" element={"Not Found"} />
+    </Routes>
   );
 }
 
