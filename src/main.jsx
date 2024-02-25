@@ -1,4 +1,5 @@
 import ReactDOM from "react-dom/client";
+import { BrowserRouter as Router } from "react-router-dom";
 
 import App from "./App.jsx";
 import "./index.css";
@@ -7,7 +8,9 @@ import "./index.css";
 import { SearchNewsProvider } from "./context/SearchNewsContext";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
-  <SearchNewsProvider>
-    <App />
-  </SearchNewsProvider>
+  <Router>
+    <SearchNewsProvider>
+      <App />
+    </SearchNewsProvider>
+  </Router>
 );
