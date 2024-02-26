@@ -60,3 +60,24 @@ export function scrollTo(x = 0, y = 69) {
   // y for scrollY (vertical), default value 69 for testing
   return window.scroll(x, y);
 }
+
+export function popularSearch() {
+  // DUMMY DATA POPULAR QUERY
+  const query = [
+    "tesla",
+    "indonesia",
+    "sport",
+    "bali",
+    "jakarta",
+    "pemilu",
+    "xiaomi",
+    "elon musk",
+    "bitcoin",
+  ];
+
+  return query[randomIntFromInterval(0, query.length - 1)];
+}
+
+function randomIntFromInterval(min, max) {
+  return Math.floor(Math.random() * (max - min + 1) + min);
+}
