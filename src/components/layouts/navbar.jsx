@@ -1,45 +1,35 @@
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { IoMenu, IoClose } from "react-icons/io5";
+import { useNavigate, useSearchParams } from "react-router-dom";
+
 import dna from "@/assets/dna.png";
+import { menus } from "@/data";
 
-import { SearchNewsContext } from "@/context/SearchNewsContext";
-
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "../ui/dialog";
+import { SearchModal } from "../elements/modal";
 import { Button } from "../ui/button";
-import { Input } from "../ui/input";
 
 export const Navbar = () => {
   const [openMenu, setOpenMenu] = useState(false);
-  const [openDialog, setOpenDialog] = useState(false);
+  const [openModal, setOpenModal] = useState(false);
   const [q, setQ] = useState("");
-  const { query, handleQuery } = useContext(SearchNewsContext);
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   const Menu = openMenu ? <IoClose size={25} /> : <IoMenu size={25} />;
-
-  const menus = [
-    { title: "Trending", path: "/" },
-    { title: "About", path: "/about" },
-  ];
 
   function handleOpenMenu() {
     setOpenMenu((openMenu) => !openMenu);
   }
-  function handleOpenDialog() {
-    setOpenDialog((openDialog) => !openDialog);
+  function handleOpenModal() {
+    setOpenModal((openModal) => !openModal);
   }
 
-  //   Implement keybind ctrl/command + "k" to open search modal
+  // Implement keybind ctrl/command + "k" to open search modal
   useEffect(() => {
     const onKeyDown = (e) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault();
-        handleOpenDialog();
+        handleOpenModal();
       }
     };
     window.addEventListener("keydown", onKeyDown);
@@ -47,6 +37,11 @@ export const Navbar = () => {
       window.removeEventListener("keydown", onKeyDown);
     };
   }, []);
+
+  // Sync value between q state and q searchParams
+  useEffect(() => {
+    setQ(searchParams.get("q"));
+  }, [searchParams]);
 
   return (
     <nav className="w-full border-b md:border-0">
@@ -57,12 +52,12 @@ export const Navbar = () => {
             <h1 className="text-3xl font-bold text-rose-600">DNA News</h1>
           </a>
           <div className="md:hidden">
-            <button
+            <Button
               className="text-rose-600 outline-none p-2 rounded-md focus:border-gray-500 focus:border"
               onClick={handleOpenMenu}
             >
               {Menu}
-            </button>
+            </Button>
           </div>
         </div>
         <div
@@ -71,60 +66,38 @@ export const Navbar = () => {
           }`}
         >
           <ul className="justify-end items-center space-y-8 md:flex md:space-x-6 md:space-y-0">
-            {menus.map((item, idx) => (
-              <li key={idx} className="font-semibold hover:text-rose-600">
-                <a href={item.path}>{item.title}</a>
+            {menus.map((menu, index) => (
+              <li key={index} className="font-semibold hover:text-rose-600">
+                <a href={menu.path}>{menu.title}</a>
               </li>
             ))}
             {/* MODAL SECTION FOR SEARCH BAR */}
-            <Dialog open={openDialog} onOpenChange={setOpenDialog}>
-              <DialogTrigger asChild>
-                <Button className="bg-rose-600 hover:bg-rose-700 flex gap-x-2 w-full md:w-auto">
-                  <svg
-                    width="25"
-                    height="25"
-                    viewBox="0 0 15 15"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M10 6.5C10 8.433 8.433 10 6.5 10C4.567 10 3 8.433 3 6.5C3 4.567 4.567 3 6.5 3C8.433 3 10 4.567 10 6.5ZM9.30884 10.0159C8.53901 10.6318 7.56251 11 6.5 11C4.01472 11 2 8.98528 2 6.5C2 4.01472 4.01472 2 6.5 2C8.98528 2 11 4.01472 11 6.5C11 7.56251 10.6318 8.53901 10.0159 9.30884L12.8536 12.1464C13.0488 12.3417 13.0488 12.6583 12.8536 12.8536C12.6583 13.0488 12.3417 13.0488 12.1464 12.8536L9.30884 10.0159Z"
-                      fill="currentColor"
-                      fillRule="evenodd"
-                      clipRule="evenodd"
-                    ></path>
-                  </svg>
-                  <span>Search ...</span>
-                  <kbd className="bg-transparent pointer-events-none ml-auto flex h-5 flex-none select-none items-center gap-1 rounded border px-1.5 font-mono text-[10px] font-semibold opacity-100">
-                    <span className="text-xs">⌘</span>K
-                  </kbd>
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-md bg-stone-800">
-                <DialogHeader>
-                  <DialogTitle className="text-center">
-                    Lagi nyari berita apa nih?
-                  </DialogTitle>
-                </DialogHeader>
-                <div className="flex w-full max-w-sm items-center space-x-2 my-4">
-                  <Input
-                    type="text"
-                    placeholder="Harga bensin mobil tesla ..."
-                    className="text-primary"
-                    onChange={(e) => setQ(e.target.value)}
-                    defaultValue={query}
-                  />
-                  <Button
-                    onClick={() => {
-                      handleQuery(q.trim());
-                      handleOpenDialog();
-                    }}
-                  >
-                    Cari
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
+            <SearchModal
+              open={openModal}
+              onOpenChange={setOpenModal}
+              setValueInput={setQ}
+              valueInput={q}
+              action={{
+                onClick: (e) => {
+                  e.preventDefault();
+                  if (!q) return;
+                  if (q.length > 3) {
+                    navigate(`/news?q=${q.trim()}`);
+                    handleOpenModal();
+                  }
+                },
+                onKeyUp: (e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    if (!q) return;
+                    if (q.length > 3) {
+                      navigate(`/news?q=${q.trim()}`);
+                      handleOpenModal();
+                    }
+                  }
+                },
+              }}
+            />
           </ul>
         </div>
       </div>
