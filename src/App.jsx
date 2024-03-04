@@ -1,6 +1,6 @@
 import { Routes, Route } from "react-router-dom";
 
-import { Home, About, News } from "./pages";
+import { Home, About, News, NotFound } from "./pages";
 
 function App() {
   return (
@@ -10,7 +10,7 @@ function App() {
       <Route path="/news" element={<News />} />
 
       {/* 404 PAGE */}
-      <Route path="*" element={"Not Found"} />
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }
