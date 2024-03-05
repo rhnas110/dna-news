@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const useLocalStorage = (key, defaultValue) => {
   // Create state variable to store
@@ -22,6 +22,21 @@ const useLocalStorage = (key, defaultValue) => {
       return defaultValue;
     }
   });
+
+  const onStorageUpdate = (e) => {
+    const { key } = e;
+    // when localstorage with key news updated, will refresh
+    if (key === "news") {
+      window.location.reload(true);
+    }
+  };
+  // sync between open tabs
+  useEffect(() => {
+    window.addEventListener("storage", onStorageUpdate);
+    return () => {
+      window.removeEventListener("storage", onStorageUpdate);
+    };
+  }, []);
 
   // this method update our localStorage and our state
   const setLocalStorageStateValue = (valueOrFn) => {
