@@ -14,7 +14,7 @@ export const NewsHeadline = () => {
   const [news, setNews] = useState([]);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
-  const [newsClicked, _] = useLocalStorage("news", []);
+  const [newsClicked, setNewsClicked] = useLocalStorage("news", []);
 
   const url_api = topHeadlinesURL("us");
 
@@ -22,7 +22,7 @@ export const NewsHeadline = () => {
     try {
       const response = await (await axios.get(url_api)).data;
 
-      if (response.status === "ok") {
+      if (response?.status === "ok") {
         const result = response.articles.map((article, index) => {
           const data = {
             id: uuidv4(),
@@ -34,7 +34,7 @@ export const NewsHeadline = () => {
             image: article?.urlToImage,
             publishedAt: article?.publishedAt,
           };
-          if (newsClicked.includes(article.title)) {
+          if (newsClicked?.includes(article.title)) {
             data.clicked = true;
           }
           if (index === 0)
@@ -112,7 +112,7 @@ export const NewsHeadline = () => {
       const response = await (
         await axios.get(url_api + `&page=${page + 1}`)
       ).data;
-      if (response.status === "ok") {
+      if (response?.status === "ok") {
         const result = response.articles.map((article) => {
           const data = {
             id: uuidv4(),
@@ -124,7 +124,7 @@ export const NewsHeadline = () => {
             image: article?.urlToImage,
             publishedAt: article?.publishedAt,
           };
-          if (newsClicked.includes(article.title)) {
+          if (newsClicked?.includes(article.title)) {
             data.clicked = true;
           }
           return {
@@ -161,7 +161,6 @@ export const NewsHeadline = () => {
                   )}
                   key={news?.id}
                   onClick={() => {
-                    // NOT SMOOTH ENOUGH
                     const data = [news.title];
 
                     let retString = localStorage.getItem("news");
@@ -169,8 +168,7 @@ export const NewsHeadline = () => {
                     retArray.forEach((item) => {
                       if (!data.includes(item)) data.push(item);
                     });
-
-                    localStorage.setItem("news", JSON.stringify(data));
+                    setNewsClicked(data);
                   }}
                 >
                   <TopHeadlinesCard news={news} />

@@ -14,7 +14,7 @@ const dummyData = generateDummyData(8);
 export const News = () => {
   const [news, setNews] = useState([]);
   const [totalResults, setTotalResults] = useState(0);
-  const [newsClicked, _] = useLocalStorage("news", []);
+  const [newsClicked, setNewsClicked] = useLocalStorage("news", []);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [searchParams, setSearchParams] = useSearchParams();
@@ -29,7 +29,7 @@ export const News = () => {
       if (!q) return false;
       const response = await (await axios.get(url_api)).data;
 
-      if (response.status === "ok") {
+      if (response?.status === "ok") {
         setTotalResults(response.totalResults);
         const result = response.articles.map((article) => {
           const data = {
@@ -42,7 +42,7 @@ export const News = () => {
             image: article?.urlToImage,
             publishedAt: article?.publishedAt,
           };
-          if (newsClicked.includes(article.title)) {
+          if (newsClicked?.includes(article.title)) {
             data.clicked = true;
           }
           return {
@@ -73,7 +73,7 @@ export const News = () => {
       const response = await (
         await axios.get(url_api + `&page=${page + 1}`)
       ).data;
-      if (response.status === "ok") {
+      if (response?.status === "ok") {
         const result = response.articles.map((article) => {
           const data = {
             id: uuidv4(),
@@ -85,7 +85,7 @@ export const News = () => {
             image: article?.urlToImage,
             publishedAt: article?.publishedAt,
           };
-          if (newsClicked.includes(article.title)) {
+          if (newsClicked?.includes(article.title)) {
             data.clicked = true;
           }
 
@@ -158,8 +158,7 @@ export const News = () => {
                     retArray.forEach((item) => {
                       if (!data.includes(item)) data.push(item);
                     });
-
-                    localStorage.setItem("news", JSON.stringify(data));
+                    setNewsClicked(data);
                   }}
                 >
                   <Card news={news} />
