@@ -4,6 +4,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 
 import dna from "@/assets/dna.png";
 import { menus } from "@/data";
+import { PAGINATION } from "@/config/pagination.config";
 
 import { SearchModal } from "../elements/modal";
 import { Button } from "../ui/button";
@@ -14,6 +15,7 @@ export const Navbar = () => {
   const [q, setQ] = useState("");
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { page, limit } = PAGINATION.DEFAULT;
 
   const Menu = openMenu ? <IoClose size={25} /> : <IoMenu size={25} />;
 
@@ -82,7 +84,7 @@ export const Navbar = () => {
                   e.preventDefault();
                   if (!q) return;
                   if (q.length > 3) {
-                    navigate(`/news?q=${q.trim()}`);
+                    navigate(`/news?q=${q.trim()}&limit=${limit}&page=${page}`);
                     handleOpenModal();
                   }
                 },
@@ -91,7 +93,9 @@ export const Navbar = () => {
                     e.preventDefault();
                     if (!q) return;
                     if (q.length > 3) {
-                      navigate(`/news?q=${q.trim()}`);
+                      navigate(
+                        `/news?q=${q.trim()}&limit=${limit}&page=${page}`
+                      );
                       handleOpenModal();
                     }
                   }
