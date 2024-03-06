@@ -1,13 +1,15 @@
 import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
 import { v4 as uuidv4 } from "uuid";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
+import ReactPaginate from "react-paginate";
 
 import { Card } from "@/components/layouts/news/card";
-import { Button, ButtonToTop } from "@/components/ui/button";
 
 import useLocalStorage from "@/hooks/useLocalStorage";
-import { generateDummyData, popularSearch } from "@/lib/utils";
+import { generateDummyData, popularSearch, scrollTo } from "@/lib/utils";
+import { allNewsURL } from "@/vendor/api/newsapi";
+import { PAGINATION } from "@/config/pagination.config";
 
 const dummyData = generateDummyData(8);
 
@@ -15,14 +17,21 @@ export const News = () => {
   const [news, setNews] = useState([]);
   const [totalResults, setTotalResults] = useState(0);
   const [newsClicked, setNewsClicked] = useLocalStorage("news", []);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
-  const [searchParams, setSearchParams] = useSearchParams();
-  const q = searchParams.get("q");
 
-  const url_api = `https://newsapi.org/v2/everything?q=${q}&apiKey=${
-    import.meta.env.VITE_NEWS_API_KEY
-  }`;
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const q = searchParams.get("q");
+  const limit = searchParams.get("limit") || PAGINATION.DEFAULT.limit;
+  const page = searchParams.get("page") || PAGINATION.DEFAULT.page;
+
+  const url_api = allNewsURL(q, page, limit);
+  const pageCount = Math.ceil(totalResults / limit);
+
+  const handlePageClick = (event) => {
+    const selectedPage = event.selected + 1;
+    navigate(`/news?q=${q}&limit=${limit}&page=${selectedPage}`);
+    scrollTo(0, 0);
+  };
 
   const fetchNews = useCallback(async () => {
     try {
@@ -50,14 +59,6 @@ export const News = () => {
           };
         });
         setNews(result);
-
-        // back to default
-        setPage(1);
-        if (response.totalResults > 100) {
-          setHasMore(true);
-        } else {
-          setHasMore(false);
-        }
       }
     } catch (error) {
       console.log(error);
@@ -68,44 +69,6 @@ export const News = () => {
     fetchNews();
   }, [fetchNews]);
 
-  const fetchMoreNews = useCallback(async () => {
-    try {
-      const response = await (
-        await axios.get(url_api + `&page=${page + 1}`)
-      ).data;
-      if (response?.status === "ok") {
-        const result = response.articles.map((article) => {
-          const data = {
-            id: uuidv4(),
-            title: article?.title,
-            description: article?.description,
-            name: article?.source?.name,
-            author: article?.author,
-            url: article?.url,
-            image: article?.urlToImage,
-            publishedAt: article?.publishedAt,
-          };
-          if (newsClicked?.includes(article.title)) {
-            data.clicked = true;
-          }
-
-          return {
-            ...data,
-          };
-        });
-        setNews((prevNews) => [...prevNews, ...result]);
-        setPage((prevPage) => prevPage + 1);
-        if (response?.totalResults > news?.length + result?.length) {
-          setHasMore(true);
-        } else {
-          setHasMore(false);
-        }
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  }, [newsClicked, url_api, page, news?.length]);
-
   if (!q) {
     const popular = popularSearch();
     return (
@@ -115,7 +78,11 @@ export const News = () => {
           <p className="opacity-80">Try search </p>
           <span
             className="font-semibold underline cursor-pointer"
-            onClick={() => setSearchParams(`q=${popular}`)}
+            onClick={() =>
+              navigate(
+                `/news?q=${popular}&limit=${PAGINATION.DEFAULT.limit}&page=${PAGINATION.DEFAULT.page}`
+              )
+            }
           >
             {popular}!
           </span>
@@ -166,19 +133,31 @@ export const News = () => {
               );
             })}
           </div>
-          <div className="text-center p-2 my-8 relative">
-            <Button
-              className="bg-rose-600 hover:bg-rose-700"
-              onClick={() => fetchMoreNews()}
-              disabled={!hasMore}
-            >
-              More
-            </Button>
-            <ButtonToTop />
+          <div className="text-center p-2 my-8">
+            <ReactPaginate
+              breakLabel="..."
+              nextLabel=">"
+              onPageChange={handlePageClick}
+              pageRangeDisplayed={3}
+              pageCount={pageCount}
+              previousLabel="<"
+              renderOnZeroPageCount={null}
+              className="flex gap-x-1.5 justify-center items-center"
+              pageLinkClassName="bg-rose-600 p-1 sm:p-2 rounded"
+              previousClassName="bg-rose-600 p-1 rounded"
+              nextClassName="bg-rose-600 p-1 rounded"
+              activeClassName="scale-[1.2]"
+              forcePage={Number(page - 1)}
+            />
           </div>
         </>
       ) : (
         <div className="flex flex-col gap-y-4 animate-pulse">
+          <div className="my-8">
+            <div className="h-8 bg-stone-400 rounded-full max-w-[50%]"></div>
+            <hr className="my-4 h-0.5 border-t-0 bg-transparent bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 opacity-25 rounded" />
+            <div className="h-4 bg-stone-400 rounded-full max-w-[75%] sm:max-w-[50%]"></div>
+          </div>
           {dummyData.map(({ id }) => {
             return (
               <div
